@@ -1,0 +1,27 @@
+[
+    {
+        "id": "7a024dbc-8622-4564-960e-536af2ed533a",
+        "title": "Homework",
+        "description": "do history homework by friday",
+        "status": "todo",
+        "createdAt": "2026-08-12T15:04:05Z",
+        "updatedAt": "2026-08-12T15:04:05Z"
+    },
+    {
+        "id": "7a024dbc-8622-4564-960e-536af2ed533b",
+        "title": "Shop",
+        "description": "get Eggs",
+        "status": "done",
+        "createdAt": "2026-08-10T9:16:45Z",
+        "updatedAt": "2026-08-11T15:14:55Z"
+
+    },
+    {
+        "id": "7a024dbc-8622-4564-960e-536af2ed533c",
+        "title": "Reading",
+        "description": "Volhv, John Faulz",
+        "status": "todo",
+        "createdAt": "2026-08-17T21:09:16Z",
+        "updatedAt": "2026-08-17T21:09:16Z"
+    }
+]
