@@ -1,0 +1,34 @@
+services:
+  hw3-psql:
+    image: postgres:18.4
+    container_name: hw3-tasks-psql
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      # создаст базу данных указаную ниже:
+      - POSTGRES_DB=${POSTGRES_DB}
+    healthcheck:
+      # Утилита pg_isready проверяет, готова ли база принимать соединения
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s   # Проверять каждые 5 секунд
+      timeout: 5s    # Ждать ответа 5 секунд
+      retries: 5     # Попытаться 5 раз перед тем, как признать сервис мертвым
+    volumes:
+      - "${PROJECT_ROOT}/out/pgdata:/var/lib/postgresql"
+    ports:
+    # потом убрать порт и подключаться через отдельный контейнер port-forwarder:
+      - "5432:5432"
+    restart: always
+    user: "${CURRENT_UID}:${CURRENT_GID}"
+#-----------------------------------------------------------------------------------------------------------------------
+  hw3-migrate:
+    image: "migrate/migrate:v4.19.1"
+    user: "${CURRENT_UID}:${CURRENT_GID}"
+    volumes: 
+      - ${PROJECT_ROOT}/migrations:/migrations
+    depends_on:
+      hw3-psql:
+        condition: service_healthy  # Ждать, пока healthcheck базы пройдет успешно!
+#-----------------------------------------------------------------------------------------------------------------------
+
+
