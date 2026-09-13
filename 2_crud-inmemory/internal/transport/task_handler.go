@@ -47,13 +47,12 @@ func (h *TaskHandler) GetTask(rw http.ResponseWriter, r *http.Request) {
 	resp, err := json.Marshal(task)
 	if err != nil {
 		w.SetStatusCode(http.StatusInternalServerError)
-		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 	w.SetStatusCode(http.StatusOK)
-	w.WriteHeader(http.StatusOK)
+	// w.WriteHeader(http.StatusOK)
 	w.Write(resp)
 }
 
@@ -77,21 +76,18 @@ func (h *TaskHandler) CreateTask(rw http.ResponseWriter, r *http.Request) {
 	err := json.Unmarshal(body, &dto)
 	if err != nil {
 		w.SetStatusCode(http.StatusBadRequest)
-		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(http.ErrBodyNotAllowed.Error()))
 		return
 	}
 
 	if dto.Title == "" {
 		w.SetStatusCode(http.StatusBadRequest)
-		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte("Empty title"))
 		return
 	}
 
 	if err := dto.Status.IsValidStatus(); err != nil {
 		w.SetStatusCode(http.StatusBadRequest)
-		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(err.Error()))
 		return
 	}
@@ -105,7 +101,6 @@ func (h *TaskHandler) CreateTask(rw http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.SetStatusCode(http.StatusCreated)
-	w.WriteHeader(http.StatusCreated)
 	w.Write([]byte(id))
 }
 
@@ -124,14 +119,12 @@ func (h *TaskHandler) UpdateTask(rw http.ResponseWriter, r *http.Request) {
 	err := json.Unmarshal(body, &dto)
 	if err != nil {
 		w.SetStatusCode(http.StatusBadRequest)
-		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(http.ErrBodyNotAllowed.Error()))
 		return
 	}
 
 	if err := dto.Status.IsValidStatus(); err != nil {
 		w.SetStatusCode(http.StatusBadRequest)
-		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(err.Error()))
 		return
 	}
@@ -144,13 +137,11 @@ func (h *TaskHandler) UpdateTask(rw http.ResponseWriter, r *http.Request) {
 	resp, err := json.Marshal(task)
 	if err != nil {
 		w.SetStatusCode(http.StatusInternalServerError)
-		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 	w.SetStatusCode(http.StatusOK)
-	w.WriteHeader(http.StatusOK)
 	w.Write(resp)
 }
 
@@ -168,7 +159,6 @@ func (h *TaskHandler) DeleteTask(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.SetStatusCode(http.StatusNoContent)
-	w.WriteHeader(http.StatusNoContent)
 }
 
 func (h *TaskHandler) GetList(rw http.ResponseWriter, r *http.Request) {
@@ -197,7 +187,6 @@ func (h *TaskHandler) GetList(rw http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.SetStatusCode(http.StatusOK)
-	w.WriteHeader(http.StatusOK)
 	w.Write(resp.Bytes())
 }
 

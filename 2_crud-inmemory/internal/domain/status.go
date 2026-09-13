@@ -1,7 +1,5 @@
 package domain
 
-import "errors"
-
 type TaskStatus string
 
 const (
@@ -16,7 +14,7 @@ func (s TaskStatus) IsValidStatus() error {
 	case InProgress:
 	case Done:
 	default:
-		return errors.New("Invalid task status")
+		return ErrInvalidTaskStatus
 	}
 	return nil
 }

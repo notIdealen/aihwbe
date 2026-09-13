@@ -30,6 +30,8 @@ type MyResponseWriter struct {
 
 func (rw *MyResponseWriter) SetStatusCode(sc int) {
 	rw.StatusCode = sc
+	rw.WriteHeader(sc)
+
 }
 
 func RequestID() Middleware {
