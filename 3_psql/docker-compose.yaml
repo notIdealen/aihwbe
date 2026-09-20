@@ -26,9 +26,9 @@ services:
     user: "${CURRENT_UID}:${CURRENT_GID}"
     volumes: 
       - ${PROJECT_ROOT}/migrations:/migrations
-    depends_on:
-      hw3-psql:
-        condition: service_healthy  # Ждать, пока healthcheck базы пройдет успешно!
+    # depends_on:
+    #   hw3-psql:
+    #     condition: service_healthy  # Ждать, пока healthcheck базы пройдет успешно!
 #-----------------------------------------------------------------------------------------------------------------------
 
 
