@@ -10,7 +10,7 @@ type Config struct {
 // config contains level and dir
 func NewConfigMust() *Config {
 	var config Config
-	if err := envconfig.Process("LOGGER", &config); err != nil {
+	if err := envconfig.Process("LOG", &config); err != nil {
 		panic("Config for logger invalid")
 	}
 	return &config

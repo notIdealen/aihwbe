@@ -1,7 +1,7 @@
 services:
-  hw3-psql:
+  psql:
     image: postgres:18.4
-    container_name: hw3-tasks-psql
+    container_name: psql-aihw
     environment:
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
@@ -21,14 +21,15 @@ services:
     restart: always
     user: "${CURRENT_UID}:${CURRENT_GID}"
 #-----------------------------------------------------------------------------------------------------------------------
-  hw3-migrate:
+  migrate:
     image: "migrate/migrate:v4.19.1"
+    container_name: migrate-aihw
     user: "${CURRENT_UID}:${CURRENT_GID}"
     volumes: 
       - ${PROJECT_ROOT}/migrations:/migrations
-    # depends_on:
-    #   hw3-psql:
-    #     condition: service_healthy  # Ждать, пока healthcheck базы пройдет успешно!
+    depends_on:
+      psql:
+        condition: service_healthy  # Ждать, пока healthcheck базы пройдет успешно!
 #-----------------------------------------------------------------------------------------------------------------------
 
 

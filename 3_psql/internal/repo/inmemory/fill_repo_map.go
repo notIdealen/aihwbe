@@ -26,6 +26,6 @@ func (r *MemoryMapDB) Fill() {
 	}
 
 	for _, task := range tasks {
-		r.db[task.ID] = task
+		r.db[task.ID.String()] = task
 	}
 }

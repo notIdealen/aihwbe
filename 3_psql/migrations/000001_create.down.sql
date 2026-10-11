@@ -1,0 +1,2 @@
+DROP TABLE hw3.tasks;
+DROP SCHEMA hw3;

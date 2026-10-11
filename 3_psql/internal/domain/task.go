@@ -1,9 +1,13 @@
 package domain
 
-import "time"
+import (
+	"time"
+
+	"github.com/google/uuid"
+)
 
 type Task struct {
-	ID        string     `json:"id"`
+	ID        uuid.UUID  `json:"id"`
 	Title     string     `json:"title"`
 	Desc      string     `json:"description"`
 	Status    TaskStatus `json:"status"`

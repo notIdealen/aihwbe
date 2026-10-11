@@ -28,8 +28,11 @@ func (r *MemoryMapDB) GetTask(ctx context.Context, id string) (domain.Task, erro
 	waiting := rand.IntN(4) + 1
 	timer := time.NewTimer(time.Second * time.Duration(waiting))
 
-	logger := utils.GetLoggerFromRequestContext(ctx)
+	logger := utils.GetLoggerFromRequestContextMust(ctx)
 	var task domain.Task
+
+	ctxwt, cancel := context.WithTimeout(ctx, time.Second*time.Duration(3))
+	defer cancel()
 
 	r.mu.RLock()
 	defer r.mu.RUnlock()
@@ -41,29 +44,32 @@ func (r *MemoryMapDB) GetTask(ctx context.Context, id string) (domain.Task, erro
 			return task, domain.ErrNotFound
 		}
 		return task, nil
-	case <-ctx.Done():
+	case <-ctxwt.Done():
 		logger.Error("Long waiting! Time out!!!!")
 		return task, domain.ErrGatewayTimeout
 	}
 }
 
 func (r *MemoryMapDB) CreateTask(ctx context.Context, task domain.Task) (string, error) {
-	var id string
+	var id uuid.UUID
 	for {
-		id = uuid.New().String()
-		if id == "" {
+		id, err := uuid.NewV7()
+		if err != nil {
 			return "", fmt.Errorf("Invalid ID generated")
 		}
-		_, ok := r.db[id]
+		_, ok := r.db[id.String()]
 		if !ok {
 			break
 		}
 	}
 
-	logger := utils.GetLoggerFromRequestContext(ctx)
+	logger := utils.GetLoggerFromRequestContextMust(ctx)
 
 	waiting := rand.IntN(4) + 1
 	timer := time.NewTimer(time.Second * time.Duration(waiting))
+
+	ctxwt, cancel := context.WithTimeout(ctx, time.Second*time.Duration(2))
+	defer cancel()
 
 	r.mu.RLock()
 	defer r.mu.RUnlock()
@@ -73,9 +79,9 @@ func (r *MemoryMapDB) CreateTask(ctx context.Context, task domain.Task) (string,
 		task.ID = id
 		task.CreatedAt = time.Now()
 		task.UpdatedAt = task.CreatedAt
-		r.db[id] = task
-		return id, nil
-	case <-ctx.Done():
+		r.db[id.String()] = task
+		return id.String(), nil
+	case <-ctxwt.Done():
 		logger.Error("Long waiting! Time out!!!!")
 		return "", domain.ErrGatewayTimeout
 	}
@@ -85,7 +91,10 @@ func (r *MemoryMapDB) DeleteTask(ctx context.Context, id string) error {
 	waiting := rand.IntN(4) + 1
 	timer := time.NewTimer(time.Second * time.Duration(waiting))
 
-	logger := utils.GetLoggerFromRequestContext(ctx)
+	logger := utils.GetLoggerFromRequestContextMust(ctx)
+
+	ctxwt, cancel := context.WithTimeout(ctx, time.Second*time.Duration(2))
+	defer cancel()
 
 	r.mu.RLock()
 	defer r.mu.RUnlock()
@@ -97,7 +106,7 @@ func (r *MemoryMapDB) DeleteTask(ctx context.Context, id string) error {
 			return nil
 		}
 		return domain.ErrNotFound
-	case <-ctx.Done():
+	case <-ctxwt.Done():
 		logger.Error("Long waiting! Time out!!!!")
 		return domain.ErrGatewayTimeout
 	}
@@ -107,14 +116,17 @@ func (r *MemoryMapDB) UpdateTask(ctx context.Context, data domain.Task) error {
 	waiting := rand.IntN(4) + 1
 	timer := time.NewTimer(time.Second * time.Duration(waiting))
 
-	logger := utils.GetLoggerFromRequestContext(ctx)
+	logger := utils.GetLoggerFromRequestContextMust(ctx)
+
+	ctxwt, cancel := context.WithTimeout(ctx, time.Second*time.Duration(2))
+	defer cancel()
 
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 
 	select {
 	case <-timer.C:
-		task, ok := r.db[data.ID]
+		task, ok := r.db[data.ID.String()]
 		if !ok {
 			return domain.ErrNotFound
 		}
@@ -122,9 +134,9 @@ func (r *MemoryMapDB) UpdateTask(ctx context.Context, data domain.Task) error {
 		task.Desc = data.Desc
 		task.Status = data.Status
 		task.UpdatedAt = time.Now()
-		r.db[data.ID] = task
+		r.db[data.ID.String()] = task
 		return nil
-	case <-ctx.Done():
+	case <-ctxwt.Done():
 		logger.Error("UpdateTask->Long waiting! Time out!!!!")
 		return domain.ErrGatewayTimeout
 	}
