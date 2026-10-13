@@ -23,7 +23,6 @@ func NewHTTPServer(router http.Handler, l *logger.Logger) *Server {
 	}
 
 	return &Server{
-		// mux: router,
 		Server: &http.Server{
 			Addr:    cfg.Addr,
 			Handler: router,
