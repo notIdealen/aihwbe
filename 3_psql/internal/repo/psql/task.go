@@ -18,9 +18,7 @@ func (db *PostgresDB) CreateTask(ctx context.Context, task domain.Task) (string,
 	q := fmt.Sprintf("INSERT INTO %s(title, description, status) VALUES($1, $2, $3) RETURNING id;", db.table)
 	err := db.QueryRow(ctxwt, q, task.Title, task.Desc, task.Status).Scan(&id)
 	if err != nil {
-		return "", domain.NewInternalServerError("task not created",
-			fmt.Sprintf("PostgresDB: CreateTask: QueryRow: %s", err),
-		)
+		return "", fmt.Errorf("PostgresDB: CreateTask: QueryRow: %w", err)
 	}
 
 	return id.String(), nil

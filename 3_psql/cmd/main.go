@@ -1,10 +1,17 @@
 package main
 
 import (
-	"net/http"
+	"context"
+	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/joho/godotenv"
-	server_mock "github.com/notIdealen/aihwbe.git/internal/server/mock"
+	"github.com/notIdealen/aihwbe.git/internal/logger"
+	"github.com/notIdealen/aihwbe.git/internal/middleware"
+	middleware_router "github.com/notIdealen/aihwbe.git/internal/middleware/router"
+	"github.com/notIdealen/aihwbe.git/internal/repo/psql"
+	server "github.com/notIdealen/aihwbe.git/internal/server/http"
 	service_task "github.com/notIdealen/aihwbe.git/internal/service/task"
 	transport_task "github.com/notIdealen/aihwbe.git/internal/transport/task"
 )
@@ -14,40 +21,35 @@ func main() {
 		panic("Not found .env file")
 	}
 
-	h := transport_task.NewTaskHandler(&service_task.TaskService{}) //   {s: service_task.TaskService{}}
-	server_mock.ServerForTestHandler("/tasks", http.HandlerFunc(h.CreateTask))
+	// h := transport_task.NewTaskHandler(&service_task.TaskService{}) //   {s: service_task.TaskService{}}
+	// server_mock.ServerForTestHandler("/tasks", http.HandlerFunc(h.CreateTask))
 
-	// logger := logger.NewBlank(logger.NewConfigMust())
-	// logger.WithCTextHandlerConsoleOut()
-	// // // logger.WithCTextHandlerFileOut()
-	// logger.Construct()
-	// logger.Info("Logger run")
+	logger := logger.NewBlank(logger.NewConfigMust())
+	logger.WithCTextHandlerConsoleOut()
+	// // logger.WithCTextHandlerFileOut()
+	logger.Construct()
+	logger.Info("Logger run")
 
-	// ctx := context.Background()
-	// config := psql.NewConfig()
-	// db := psql.NewPostgresPool(ctx, config)
-	// db.Connect(ctx)
-	// defer db.Close()
+	ctx := context.Background()
+	config := psql.NewConfig()
+	db := psql.NewPostgresPool(ctx, config)
+	defer db.Close()
 
-	// task1, _ := db.GetTask(ctx, "cd6f839f-dfb3-4b93-8f7b-6be25a7917e8")
-	// fmt.Println(task1)
-	// stop, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGINT)
-	// defer cancel()
+	stop, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGINT)
+	defer cancel()
 
-	// // db := repo.NewDB()
-	// // db.Fill()
-	// s := service.NewTaskService(db)
-	// taskHandler := transport_task.NewTaskHandler(s)
+	s := service_task.NewTaskService(db)
+	taskHandler := transport_task.NewTaskHandler(s)
 
-	// router := server.NewRouter()
-	// router.SetHandlers(taskHandler.GetRoutes())
-	// wrappedRouter := middleware.WrapRouter(router,
-	// 	middleware.Logger(logger),
-	// 	middleware.RequestID(),
-	// middleware.ChangeWriter(),
-	// )
+	router := server.NewRouter()
+	router.SetHandlers(taskHandler.GetRoutes())
+	wrappedRouter := middleware.WrapRouter(router,
+		middleware_router.Logger(logger),
+		middleware_router.RequestID(),
+		middleware_router.SetWriterAndWriteLog(),
+	)
 
-	// server := server.NewCServer(server.NewConfigMust())
-	// server.AttachHandler(wrappedRouter)
-	// server.Run(stop, logger)
+	server := server.NewCServer(server.NewConfigMust())
+	server.AttachHandler(wrappedRouter)
+	server.Run(stop, logger)
 }

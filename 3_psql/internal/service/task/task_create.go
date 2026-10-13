@@ -6,20 +6,20 @@ import (
 	"strings"
 
 	"github.com/notIdealen/aihwbe.git/internal/domain"
+	service_error "github.com/notIdealen/aihwbe.git/internal/service/error"
 	transport_task "github.com/notIdealen/aihwbe.git/internal/transport/task"
 )
 
 func (s *TaskService) CreateTask(ctx context.Context, dto transport_task.CreateTaskRequestDTO) (string, error) {
-	strings.TrimSpace(dto.Title)
+	dto.Title = strings.TrimSpace(dto.Title)
 	if dto.Title == "" {
-		return "", domain.NewBadRequestError("Empty title",
-			"TaskService: CreateTask: dto.Title == ''",
-		)
+		return "", service_error.NewValidationError("Empty title", "TaskService: CreateTask: dto.Title == ''")
 	}
+
 	status, err := domain.GetStatus(dto.Status)
 	if err != nil {
-		return "", domain.NewBadRequestError("invalid status",
-			fmt.Sprintf("TaskService: domain.GetStatus: %s", err),
+		return "", service_error.NewValidationError("invalid status",
+			fmt.Sprintf("TaskService: CreateTask: GetStatus: %s", err),
 		)
 	}
 
@@ -30,7 +30,7 @@ func (s *TaskService) CreateTask(ctx context.Context, dto transport_task.CreateT
 	}
 	id, err := s.DB.CreateTask(ctx, task)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("TaskService: CreateTask: %w", err)
 	}
 
 	return id, nil

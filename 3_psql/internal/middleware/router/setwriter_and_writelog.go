@@ -5,20 +5,10 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/notIdealen/aihwbe.git/internal/domain"
 	"github.com/notIdealen/aihwbe.git/internal/logger"
 	"github.com/notIdealen/aihwbe.git/internal/middleware"
 )
-
-type MyResponseWriter struct {
-	http.ResponseWriter
-	StatusCode int
-	Log        string
-}
-
-// func (rw *MyResponseWriter) SetStatusCode(sc int) {
-// 	rw.StatusCode = sc
-// 	rw.WriteHeader(sc)
-// }
 
 func SetWriterAndWriteLog() middleware.Middleware {
 	return func(h http.Handler) http.Handler {
@@ -27,21 +17,22 @@ func SetWriterAndWriteLog() middleware.Middleware {
 			logger, ok := ctx.Value("logger").(*logger.Logger)
 			if !ok {
 				// ошибка 5хх
+				w.WriteHeader(http.StatusInternalServerError)
 				return
 			}
-			logger.With(
+			wlogger := logger.With(
 				slog.String("Request_ID", r.Header.Get("X-Request-ID")),
 				slog.String("Method", r.Method),
 				slog.String("Host", r.Host),
 				slog.String("Path", r.URL.Path),
 			)
-			logger.Debug(">>>")
+			wlogger.Info(">>>")
 
-			mrw := &MyResponseWriter{ResponseWriter: w}
+			mrw := &domain.MyResponseWriter{ResponseWriter: w, StatusCode: -1, Log: ""}
 			start := time.Now()
 			h.ServeHTTP(mrw, r)
 
-			logger.Debug("<<<",
+			logger.Info("<<<",
 				slog.Float64("Duration", float64(time.Since(start).Milliseconds())/1000),
 				slog.Int("StatusCode", mrw.StatusCode),
 				slog.String("Text error", mrw.Log),

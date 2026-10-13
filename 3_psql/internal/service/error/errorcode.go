@@ -1,11 +1,10 @@
-package domain
+package service_error
 
-type ErrorCode string
+type ErrorCode int
 
 const (
-	ErrNotFound       ErrorCode = "404 not found"
-	ErrBadRequest     ErrorCode = "400 bad request"
-	ErrInternalServer ErrorCode = "500 internal server"
+	ErrValidation ErrorCode = iota
+	ErrInternalServer
 )
 
 // 400 Bad Request — некорректный или повреждённый запрос.
