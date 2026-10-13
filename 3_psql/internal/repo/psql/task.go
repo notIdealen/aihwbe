@@ -25,8 +25,6 @@ func (db *PostgresDB) CreateTask(ctx context.Context, task domain.Task) (string,
 }
 
 func (db *PostgresDB) GetTask(ctx context.Context, id string) (domain.Task, error) {
-	// logger := utils.GetLoggerFromRequestContextMust(ctx)
-
 	// ctxwt, cancel := context.WithTimeout(ctx, db.timerForContext)
 	// defer cancel()
 	// q := fmt.Sprintf("SELECT id, title, description, status, created_at, updated_at FROM %s WHERE id=$1;", db.table)
@@ -35,8 +33,6 @@ func (db *PostgresDB) GetTask(ctx context.Context, id string) (domain.Task, erro
 	// if err != nil {
 	// 	logger.Error("Bad scan when get task:", slog.String("err", err.Error()))
 	// }
-	// logger.Info("Get task by id", slog.String("id", task.ID.String()))
-
 	return task, nil
 }
 
